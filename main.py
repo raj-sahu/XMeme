@@ -1,5 +1,5 @@
 from typing import Optional, List
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse
 import databases
@@ -16,19 +16,19 @@ app = FastAPI(title="XMeme",
 class MemeIn(BaseModel):
     name: str
     caption: str
-    meme_url: str
+    url: str
 
 
 class Meme(BaseModel):
     id: int
     name: str
     caption: str
-    meme_url: str
+    url: str
     upload_time: datetime.datetime
 
 
 ###########################################################    DB     ######################################################
-inMemoryDb = []
+
 DATABASE_URL = "sqlite:///./test.db"
 database = databases.Database(DATABASE_URL)
 metadata = sqlalchemy.MetaData()
@@ -38,7 +38,7 @@ uploadedMemes = sqlalchemy.Table(
     sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
     sqlalchemy.Column("name", sqlalchemy.String),
     sqlalchemy.Column("caption", sqlalchemy.String),
-    sqlalchemy.Column("meme_url", sqlalchemy.String),
+    sqlalchemy.Column("url", sqlalchemy.String),
     sqlalchemy.Column("upload_time", sqlalchemy.DateTime),
 )
 engine = sqlalchemy.create_engine(
@@ -60,42 +60,36 @@ async def shutdown():
 #############################################################################################################################
 
 
-@app.get("/", response_class=HTMLResponse)
-async def read_root():
-    img_content = """
-        <html>
-         <head>
-            <title> XMeme </title>
-         </head>
-        <body id="particle">
-            <h2 align="center">Memes</h2>"""
-    for meme in inMemoryDb:
-        img_content += f"<span> <img src=\"{meme['meme_url']}\" alt=\"ImgNotLoaded\"></span>"
-    img_content += """
-        </body>
-    </html>
-    """
-    return HTMLResponse(content=img_content, status_code=200)
-
-
-# @app.get("/items/{item_id}")
-# async def read_item(item_id: int, q: Optional[str] = None):
-#     return {"item_id": item_id, "q": q}
-
-# @app.post("/memes")
-# def upload_meme(meme: MemeIn):
-#     inMemoryDb.append(meme.dict())
-#     return inMemoryDb[-1]
 @app.get("/memes/", response_model=List[Meme])
-async def read_notes():
-    query = uploadedMemes.select()
-    # database.fetch
+async def get_top_100_memes():
+    N = await database.fetch_all("SELECT count(*) FROM Memes")
+    N = N[0][0]
+    print("--------------------------"*5, "\n\t\t\t\tNO OF ITEMS\n",
+          N, "\n-", "--------------------------"*5)
+    query = f"SELECT * FROM (SELECT * FROM Memes LIMIT 100 OFFSET {N}-100) "
+
     return await database.fetch_all(query)
 
 
-@app.post("/memes/", response_model=Meme)
+@app.get("/memes/{id}")
+async def get_meme(id: int):
+    query = uploadedMemes.select().where(uploadedMemes.c.id == id)
+    response = await database.fetch_all(query)
+    try:
+        print("--------------------------"*5, "\n\t\t\t\tData\n",
+              response[0], "\n-", "--------------------------"*5)
+    except:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    return response[0]
+
+
+@ app.post("/memes/")
 async def upload_meme(meme: MemeIn):
     query = uploadedMemes.insert().values(
-        name=meme.name, caption=meme.caption, meme_url=meme.meme_url, upload_time=datetime.datetime.now())
+        name=meme.name, caption=meme.caption, url=meme.url, upload_time=datetime.datetime.now())
     last_record_id = await database.execute(query)
-    return {**meme.dict(), "id": last_record_id}
+    print("--------------------------"*5, "\n\t\t\t\tDATA INSERTED  \n",
+          f"\nId={last_record_id}\n", "---------------------------"*5)
+
+    return {"id": last_record_id}
