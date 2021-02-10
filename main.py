@@ -1,10 +1,12 @@
-from typing import Optional, List
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from fastapi.responses import HTMLResponse
-import databases
-import sqlalchemy
 import datetime
+from typing import List, Optional
+
+import databases
+import requests
+import sqlalchemy
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
+from pydantic import BaseModel
 
 app = FastAPI(title="XMeme",
               description="This is a very fancy project to share dope Memes",
@@ -84,12 +86,28 @@ async def get_meme(id: int):
     return response[0]
 
 
+async def sendRequest(url):
+    try:
+        page = requests.get(url)
+
+    except Exception as e:
+        print("error:", e)
+        return False
+
+    if (page.status_code != 200):
+        return False
+
+    return page.headers['content-type'][:5] == 'image'
+
+
 @ app.post("/memes/")
 async def upload_meme(meme: MemeIn):
+    ImageUrl = await sendRequest(meme.url)
+    if(ImageUrl == False):
+        raise HTTPException(status_code=415, detail="Cant Fetch Image fom URL")
     query = uploadedMemes.insert().values(
         name=meme.name, caption=meme.caption, url=meme.url, upload_time=datetime.datetime.now())
     last_record_id = await database.execute(query)
     print("--------------------------"*5, "\n\t\t\t\tDATA INSERTED  \n",
           f"\nId={last_record_id}\n", "---------------------------"*5)
-
     return {"id": last_record_id}
