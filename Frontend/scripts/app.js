@@ -215,46 +215,52 @@ function bgparticle() {
     }
   );
 }
-
-fetch("http://127.0.0.1:8000/memes/", {
-  method: "GET",
-})
-  .then((response) => response.json())
-  .then((x) => {
-    console.log(x[0]);
-    return x;
+function getCards() {
+  fetch("http://127.0.0.1:8000/memes/", {
+    method: "GET",
   })
-  .then((x) => {
-    let text =
-      '<card data-image="{0}"> \
+    .then((response) => response.json())
+    .then((x) => {
+      console.log(x[0]);
+      return x;
+    })
+    .then((x) => {
+      let text =
+        '<card data-image="{0}"> \
             <h1 slot = "header" > {1}</h1 >\
             <p slot = "content" >&nbsp;Uploaded by {2}<br>@&ensp;{4}&emsp;{3}</p >\
             </card > ';
-    for (var meme of x) {
-      $("#app").append(
-        format(text, [
-          meme["url"],
-          meme["caption"],
-          meme["name"],
-          meme["upload_time"].slice(0, 10),
-          meme["upload_time"].slice(11, 16),
-        ])
-      );
-    }
-    // console.log(text);
-    return text;
-  })
-  .then((text) => {
-    // $("#app").append(text);
-    // $("#app").append(
-    //   '<card data-image="https://i.redd.it/vvn2d39mu2g61.jpg"><h1 slot = "header">Kane</h1 ><p slot ="content">SuperMAN.</p></card >'
-    // );
-    // $("#app").append(
-    //   '<card data-image="https://i.redd.it/vvn2d39mu2g61.jpg"><h1 slot = "header">Kane</h1 ><p slot ="content">SuperMAN.</p></card >'
-    // );
-    cardDesign();
-    bgparticle();
-  });
+
+      for (var meme of x) {
+        $("#app").append(
+          format(text, [
+            meme["url"],
+            meme["caption"],
+            meme["name"],
+            meme["upload_time"].slice(0, 10),
+            meme["upload_time"].slice(11, 16),
+          ])
+        );
+      }
+      // console.log(text);
+      return text;
+    })
+    .then((text) => {
+      // $("#app").append(text);
+      // $("#app").append(
+      //   '<card data-image="https://i.redd.it/vvn2d39mu2g61.jpg"><h1 slot = "header">Kane</h1 ><p slot ="content">SuperMAN.</p></card >'
+      // );
+      // $("#app").append(
+      //   '<card data-image="https://i.redd.it/vvn2d39mu2g61.jpg"><h1 slot = "header">Kane</h1 ><p slot ="content">SuperMAN.</p></card >'
+      // );
+      cardDesign();
+      bgparticle();
+    });
+}
+function sleep(time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+getCards();
 ////POST
 formElem.onsubmit = async (e) => {
   e.preventDefault();
@@ -273,14 +279,14 @@ formElem.onsubmit = async (e) => {
     },
     body: JSON.stringify(data),
   });
-  if (response.status == "200")
+  if (response.status == "200") {
     Swal.fire({
       icon: "success",
       title: "Meme Uploaded",
       showConfirmButton: false,
       timer: 1050,
     });
-  else if (response.status == "415")
+  } else if (response.status == "415")
     Swal.fire({
       title: "Oops...",
       text: "Unable to fetch meme check url",
@@ -293,6 +299,11 @@ formElem.onsubmit = async (e) => {
       title: "Oops...",
       text: "Something went wrong!" + response.status,
     });
+  if (response.status == "200") {
+    sleep(1500).then(() => {
+      window.location.reload();
+    });
+  }
 };
 
 var $input = $(".form-fieldset > input");
