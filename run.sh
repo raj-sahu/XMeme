@@ -1,2 +1,2 @@
-# conda activate XMeme
+//conda activate XMeme
 hypercorn main:app --reload

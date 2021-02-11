@@ -7,11 +7,24 @@ import sqlalchemy
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+origins = [
+    "http://127.0.0.1:*",
+    "http://127.0.0.1:5500",
+    "http://localhost:*",
+    "http://localhost:8080",
+]
 
 app = FastAPI(title="XMeme",
               description="This is a very fancy project to share dope Memes",
               )
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # MODELS
 
 
@@ -68,8 +81,8 @@ async def get_top_100_memes():
     N = N[0][0]
     print("--------------------------"*5, "\n\t\t\t\tNO OF ITEMS\n",
           N, "\n-", "--------------------------"*5)
-    query = f"SELECT * FROM (SELECT * FROM Memes LIMIT 100 OFFSET {N}-100) "
-
+    # query = f"SELECT * FROM Memes LIMIT 100 OFFSET {N}-100 "
+    query = f"SELECT * FROM Memes ORDER BY id DESC LIMIT 100"
     return await database.fetch_all(query)
 
 
