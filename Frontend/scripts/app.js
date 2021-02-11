@@ -1,5 +1,5 @@
 var typed = new Typed("#Hello", {
-  strings: ["XMeme", "Top 100 Uploaded Memes :"],
+  strings: ["XMeme :", "Top 100 Uploaded Memes :"],
   typeSpeed: 100,
   backSpeed: 110,
   smartBackspace: true,
@@ -95,22 +95,22 @@ function cardDesign() {
 }
 function bgparticle() {
   particlesJS(
-    "app",
+    "particle",
 
     {
       particles: {
         number: {
-          value: 120,
+          value: 150,
           density: {
             enable: true,
             value_area: 800,
           },
         },
         color: {
-          value: "#596275",
+          value: "#ececec",
         },
         shape: {
-          type: "circle",
+          type: ["star", "circle"],
           stroke: {
             width: 0,
             color: "#000000",
@@ -145,7 +145,7 @@ function bgparticle() {
           },
         },
         line_linked: {
-          enable: true,
+          enable: false,
           distance: 150,
           color: "#596275",
           opacity: 0.4,
@@ -253,5 +253,49 @@ fetch("http://127.0.0.1:8000/memes/", {
     //   '<card data-image="https://i.redd.it/vvn2d39mu2g61.jpg"><h1 slot = "header">Kane</h1 ><p slot ="content">SuperMAN.</p></card >'
     // );
     cardDesign();
-    // bgparticle();
+    bgparticle();
   });
+////POST
+formElem.onsubmit = async (e) => {
+  e.preventDefault();
+
+  var form = document.querySelector("#formElem");
+  data = {
+    name: form.querySelector('input[name="name"]').value,
+    caption: form.querySelector('input[name="caption"]').value,
+    url: form.querySelector('input[name="url"]').value,
+  };
+
+  let response = await fetch("http://127.0.0.1:8000/memes/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  if (response.status == "200")
+    Swal.fire({
+      icon: "success",
+      title: "Meme Uploaded",
+      showConfirmButton: false,
+      timer: 1050,
+    });
+  else if (response.status == "415")
+    Swal.fire({
+      title: "Oops...",
+      text: "Unable to fetch meme check url",
+      icon: "error",
+      confirmButtonText: "Ok",
+    });
+  else
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: "Something went wrong!" + response.status,
+    });
+};
+
+var $input = $(".form-fieldset > input");
+$input.blur(function (e) {
+  $(this).toggleClass("filled", !!$(this).val());
+});
