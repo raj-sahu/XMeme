@@ -9,10 +9,9 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 origins = [
-    "http://127.0.0.1:*",
-    "http://127.0.0.1:5500",
-    "http://localhost:*",
-    "http://localhost:8080",
+    "https://xmeme-raj.netlify.app/",
+    "https://xmeme-raj.netlify.app:*",
+    "https://xmeme-raj.netlify.app",
 ]
 
 app = FastAPI(title="XMeme",
@@ -73,6 +72,10 @@ async def shutdown():
     await database.disconnect()
 
 #############################################################################################################################
+@app.get("/")
+async def home():
+    return 'Welcome To XMeme Backend'
+
 
 
 @app.get("/memes/", response_model=List[Meme])
