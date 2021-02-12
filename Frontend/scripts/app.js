@@ -216,7 +216,7 @@ function bgparticle() {
   );
 }
 function getCards() {
-  fetch("http://127.0.0.1:8000/memes/", {
+  fetch("https://xmeme-raj.herokuapp.com/memes/", {
     method: "GET",
   })
     .then((response) => response.json())
@@ -272,7 +272,7 @@ formElem.onsubmit = async (e) => {
     url: form.querySelector('input[name="url"]').value,
   };
 
-  let response = await fetch("http://127.0.0.1:8000/memes/", {
+  let response = await fetch("https://xmeme-raj.herokuapp.com/memes/", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
