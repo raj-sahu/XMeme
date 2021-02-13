@@ -1,0 +1,1 @@
+curl --location --request POST "http://localhost:8081/memes"  --header  "Content-Type: application/json" --data-raw "{\"name\":\"Ashok kumar\",\"caption\":\"Pika Pika\",\"url\":\"https://image.shutterstock.com/image-photo/tulungagung-jawa-timur-november-24-260nw-1859927107.jpg\"}"
