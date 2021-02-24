@@ -1,8 +1,4 @@
----
----
-<h1 align="center">XMeme :</h1>
----
----
+<h1 align="center">XMeme: </h1>
 
 [![](https://img.shields.io/badge/Swagger%20-Docs-blue.svg)](https://xmeme-raj.herokuapp.com/docs)
 [![](https://img.shields.io/badge/Backend-launch-Yellow.svg)](https://xmeme-raj.herokuapp.com/)
