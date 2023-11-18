@@ -96,5 +96,5 @@ chmod +x server_run.sh
 > > Run :
 >
 > ```
-> docker run -d --net="host" xmeme_app
+> docker run -d --net="host" rajsahudocker/xmeme_app
 > ```
